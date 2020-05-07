@@ -57,10 +57,14 @@ const App = ({ state, pass, stop, totalWon, meanWon }) => {
         ) : null}
       </div>
 
-      {state.history.length > 0 ? <h2>Storico (vincite totali: {totalWon}€. Media: {meanWon}€)</h2> : null}
-      {state.history.map(({ month, won, seen }) => (
+      {state.history.length > 0 ? <h2>Storico (vittorie: {totalWon} su {state.history.length})</h2> : null}
+      {state.history.map(({ month, seen, chosenNumber, maxIndex, maxNumber }) => (
         <p key={month}>
-          Mese {month}: hai girato {seen} fogl{seen === 1 ? 'io' : 'i'}, poi hai scelto {won}
+          Mese {month}:{' '}
+          { chosenNumber === maxNumber ?
+            `hai trovato il massimo, ${chosenNumber}, dopo aver girato ${seen} fogl${seen === 1 ? 'io' : 'i'}` :
+            `hai scelto ${chosenNumber}, dopo aver girato ${seen} fogl${seen === 1 ? 'io' : 'i'}, ma il massimo era ${maxNumber}, in posizione ${maxIndex + 1}`
+          }
         </p>
       ))}
     </Container>
@@ -70,17 +74,10 @@ const App = ({ state, pass, stop, totalWon, meanWon }) => {
 const selectHistory = state => state.history
 const selectTotalWon = createSelector(
   [selectHistory],
-  (history) => history.map(({won}) => won).reduce((t, i) => t + i, 0)
-)
-const selectMeanWon = createSelector(
-  [selectHistory, selectTotalWon],
-  (history, totalWon) => {
-    if (!history.length) return null
-    return (totalWon / history.length).toFixed(1)
-  }
+  (history) => history.filter(({chosenNumber, maxNumber}) => chosenNumber === maxNumber).length
 )
 
-const mapState = (state) => ({ state, totalWon: selectTotalWon(state), meanWon: selectMeanWon(state) });
+const mapState = (state) => ({ state, totalWon: selectTotalWon(state) });
 
 const mapDispatch = { pass, stop };
 

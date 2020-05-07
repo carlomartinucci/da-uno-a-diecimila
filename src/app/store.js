@@ -5,7 +5,7 @@ import appReducer from "./appSlice";
 
 const loadState = () => {
   try {
-    const serializedState = localStorage.getItem('state');
+    const serializedState = localStorage.getItem('state2');
     if (serializedState === null) {
       return undefined;
     }
@@ -19,7 +19,7 @@ const loadState = () => {
 const saveState = (state) => {
   try {
     const serializedState = JSON.stringify(state);
-    localStorage.setItem('state', serializedState);
+    localStorage.setItem('state2', serializedState);
   } catch (err) {
     console.error('saving error', err)
   }
