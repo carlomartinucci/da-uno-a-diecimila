@@ -1,58 +1,87 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React from "react";
+import Container from "react-bootstrap/Container";
+import {createSelector} from "@reduxjs/toolkit";
+import { connect } from "react-redux";
+import { pass, stop } from "./app/appSlice";
 
-function App() {
+const App = ({ state, pass, stop, totalWon, meanWon }) => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
-}
+    <Container className="p-3">
+      <h1>
+        Lo stesso amico matematico della scorsa volta vi propone un altro
+        quesito.
+      </h1>
+      <p>
+        Immagina di avere di fronte a te 100 fogli con altrettanti numeri
+        scritti all'interno, estratti casualmente tra 1 e 10000.
+      </p>
+      <p>
+        Le carte sono coperte, quindi non vedi il numero che vi è scritto
+        all'interno.
+      </p>
+      <p>
+        Ti chiedo di scegliere quello che secondo te è il numero più grande, ma
+        senza la possibilità di scegliere tra tutti quelli estratti, ma solo
+        dall'ultimo che sceglierai.
+      </p>
+      <p>
+        Ossia se giri al primo 3000 e al secondo 2000 non potrai più scegliere
+        3000 perchè hai girato la carta che nascondeva i 2000.
+      </p>
+      <p>
+        Ora, qual è secondo te il metodo migliore per assicurarsi la vittoria?
+      </p>
+      <p>Quando è secondo te più profittevole smettere di girare carte?</p>
 
-export default App;
+      <h2>Gioco del mese {state.month}</h2>
+      <div className="row mb-4">
+        <div className="col-sm-6">
+          <p className="mb-0">Ci sono {100 - state.seen} fogli coperti.</p>
+          <button className="btn btn-primary btn-block" onClick={() => pass()}>
+            Gira un foglio
+          </button>
+        </div>
+        {state.seen > 0 ? (
+          <div className="col-sm-6">
+            <p className="mb-0">
+              L'ultimo foglio girato ha scritto il numero{" "}
+              {state.sheets[state.seen - 1]}.
+            </p>
+            <button
+              className="btn btn-primary btn-block"
+              onClick={() => stop()}
+            >
+              Scegli {state.sheets[state.seen - 1]}
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      {state.history.length > 0 ? <h2>Storico (vincite totali: {totalWon}€. Media: {meanWon}€)</h2> : null}
+      {state.history.map(({ month, won, seen }) => (
+        <p key={month}>
+          Mese {month}: hai girato {seen} fogl{seen === 1 ? 'io' : 'i'}, poi hai scelto {won}
+        </p>
+      ))}
+    </Container>
+  );
+};
+
+const selectHistory = state => state.history
+const selectTotalWon = createSelector(
+  [selectHistory],
+  (history) => history.map(({won}) => won).reduce((t, i) => t + i, 0)
+)
+const selectMeanWon = createSelector(
+  [selectHistory, selectTotalWon],
+  (history, totalWon) => {
+    if (!history.length) return null
+    return (totalWon / history.length).toFixed(1)
+  }
+)
+
+const mapState = (state) => ({ state, totalWon: selectTotalWon(state), meanWon: selectMeanWon(state) });
+
+const mapDispatch = { pass, stop };
+
+export default connect(mapState, mapDispatch)(App);
