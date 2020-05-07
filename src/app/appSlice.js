@@ -21,7 +21,7 @@ const appSlice = createSlice({
     history: [],
   },
   reducers: {
-    pass: state => void state.seen++,
+    pass: state => {state.seen = state.seen === 100 ? 100 : state.seen + 1},
     stop: (state) => {
       return {
         month: state.month + 1,

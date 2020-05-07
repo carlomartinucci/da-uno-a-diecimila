@@ -37,7 +37,7 @@ const App = ({ state, pass, stop, totalWon, meanWon }) => {
       <div className="row mb-4">
         <div className="col-sm-6">
           <p className="mb-0">Ci sono {100 - state.seen} fogli coperti.</p>
-          <button className="btn btn-primary btn-block" onClick={() => pass()}>
+          <button className="btn btn-primary btn-block" disabled={state.seen === 100} onClick={() => pass()}>
             Gira un foglio
           </button>
         </div>
